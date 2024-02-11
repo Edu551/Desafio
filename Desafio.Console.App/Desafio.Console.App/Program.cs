@@ -14,15 +14,15 @@ PratoModel test = new("", prato);
 
 IPratoFavorito pratoQueGosta = new ImprimePrato();
 
-var sair = "n";
+string? sair = "";
 do
 {
-    Console.WriteLine("\nPense em um prato que gosta");
+    Console.WriteLine("\nPense em um prato que gosta e responda 's' ou 'n' ");
 
-    var acertou = false;
+    bool acertou = false;
     bool continuaProcura = true;
 
-    var indice = test.ListaDePratos.Count;
+    int indice = test.ListaDePratos.Count;
 
     while (indice > 0)
     {
@@ -45,7 +45,7 @@ do
         Console.WriteLine("Acertei de novo! \n");
     }
 
-    Console.WriteLine("Deseja sair? Se sim digite sim \n");
+    Console.WriteLine("Deseja sair? Se sim digite 'sim' \n");
     sair = Console.ReadLine();
     Console.Clear();
 } while (sair != "sim");
@@ -67,10 +67,6 @@ public class PratoModel : IComidaFavorita
     public string Prato { get; set; }
 
     public List<PratoModel> ListaDePratos { get; set; } = [];
-
-    public PratoModel()
-    {
-    }
 
     public PratoModel(string prato)
     {
@@ -104,7 +100,7 @@ public class ImprimePrato : IPratoFavorito
         {
             acertou = true;
             continuaProcura = false;
-            var indice = prato.ListaDePratos.Count;
+            int indice = prato.ListaDePratos.Count;
 
             IPratoFavorito pratoQueGosta = new ImprimePrato();
             while (indice > 0)
@@ -140,8 +136,8 @@ public class Funcoes
         if (!string.IsNullOrEmpty(nomePratoNovo))
         {
 
-            Console.WriteLine($@"Digite uma característica do prato {nomePratoNovo}. 
-                                 Caso não queira dar uma característica deixe em branco.");
+            Console.WriteLine($@"Digite uma característica do prato {nomePratoNovo}.
+Caso não queira dar uma característica deixe em branco.");
             string? caracteristicaPratoNovo = Console.ReadLine();
 
             PratoModel pratoNovo = new(string.IsNullOrWhiteSpace(caracteristicaPratoNovo)
