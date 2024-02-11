@@ -10,24 +10,24 @@ List<PratoModel> prato = new List<PratoModel>
             new PratoModel("Bolo de chocolate")
         };
 
-PratoModel test = new("", prato);
+PratoModel pratoInicial = new("", prato);
 
 IPratoFavorito pratoQueGosta = new ImprimePrato();
 
-string? sair = "";
+var sair = "n";
 do
 {
-    Console.WriteLine("\nPense em um prato que gosta e responda 's' ou 'n' ");
+    Console.WriteLine("\nPense em um prato que gosta, digite 's' para 'sim' e 'n' para 'não'");
 
-    bool acertou = false;
+    var acertou = false;
     bool continuaProcura = true;
 
-    int indice = test.ListaDePratos.Count;
+    var indice = pratoInicial.ListaDePratos.Count;
 
     while (indice > 0)
     {
         indice--;
-        test.ListaDePratos[indice].Accept(pratoQueGosta, ref acertou, ref continuaProcura);
+        pratoInicial.ListaDePratos[indice].BuscarPrato(pratoQueGosta, ref acertou, ref continuaProcura);
 
         if (acertou || !continuaProcura)
         {
@@ -36,7 +36,7 @@ do
 
         if (indice == 0)
         {
-            Funcoes.InserirNovoPrato(test);
+            Funcoes.InserirNovoPrato(pratoInicial);
         }
     }
 
@@ -54,12 +54,12 @@ do
 
 public interface IPratoFavorito
 {
-    void ImprimirPrato(PratoModel prato, ref bool acertou, ref bool continuaProcura);
+    void ValidarPrato(PratoModel prato, ref bool acertou, ref bool continuaProcura);
 }
 
 public interface IComidaFavorita
 {
-    void Accept(IPratoFavorito visitor, ref bool acertou, ref bool continuaProcura);
+    void BuscarPrato(IPratoFavorito pratoFavorito, ref bool acertou, ref bool continuaProcura);
 }
 
 public class PratoModel : IComidaFavorita
@@ -79,16 +79,16 @@ public class PratoModel : IComidaFavorita
         ListaDePratos = listaDePratos;
     }
 
-    public void Accept(IPratoFavorito visitor, ref bool acertou, ref bool continuaProcura)
+    public void BuscarPrato(IPratoFavorito pratoFavorito, ref bool acertou, ref bool continuaProcura)
     {
-        visitor.ImprimirPrato(this, ref acertou, ref continuaProcura);
+        pratoFavorito.ValidarPrato(this, ref acertou, ref continuaProcura);
     }
 }
 
 
 public class ImprimePrato : IPratoFavorito
 {
-    public void ImprimirPrato(PratoModel prato, ref bool acertou, ref bool continuaProcura)
+    public void ValidarPrato(PratoModel prato, ref bool acertou, ref bool continuaProcura)
     {
         acertou = false;
 
@@ -100,13 +100,13 @@ public class ImprimePrato : IPratoFavorito
         {
             acertou = true;
             continuaProcura = false;
-            int indice = prato.ListaDePratos.Count;
+            var indice = prato.ListaDePratos.Count;
 
             IPratoFavorito pratoQueGosta = new ImprimePrato();
             while (indice > 0)
             {
                 indice--;
-                prato.ListaDePratos[indice].Accept(pratoQueGosta, ref acertou, ref continuaProcura);
+                prato.ListaDePratos[indice].BuscarPrato(pratoQueGosta, ref acertou, ref continuaProcura);
 
                 if (acertou)
                 {
@@ -136,7 +136,7 @@ public class Funcoes
         if (!string.IsNullOrEmpty(nomePratoNovo))
         {
 
-            Console.WriteLine($@"Digite uma característica do prato {nomePratoNovo}.
+            Console.WriteLine($@"Digite uma característica do prato {nomePratoNovo}. 
 Caso não queira dar uma característica deixe em branco.");
             string? caracteristicaPratoNovo = Console.ReadLine();
 
