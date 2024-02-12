@@ -141,9 +141,9 @@ Caso não queira dar uma característica deixe em branco.");
             bool pratoOuDescricaoJaExiste = ValidaPratoNovo(prato, nomePratoNovo, caracteristicaPratoNovo);
             if (!pratoOuDescricaoJaExiste)
             {
-                PratoModel pratoNovo = new(string.IsNullOrWhiteSpace(caracteristicaPratoNovo)
-                ? nomePratoNovo
-                : caracteristicaPratoNovo, [new(nomePratoNovo)]);
+                PratoModel pratoNovo = string.IsNullOrWhiteSpace(caracteristicaPratoNovo)
+                ? new(nomePratoNovo)
+                : new(caracteristicaPratoNovo, [new(nomePratoNovo)]);
 
                 prato.ListaDePratos.Add(pratoNovo);
             }
