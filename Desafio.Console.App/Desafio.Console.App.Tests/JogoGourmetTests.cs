@@ -5,29 +5,84 @@ using NUnit.Framework.Legacy;
 public class JogoGourmetTests
 {
     [Test]
-    public void ValidarPratoHelper_JogoDescobreOPratoCerto_AcertouOPrato()
+    public void ValidarPrato_DeveRetornarPratoCorreto_QuandoUsuarioRespondeSimNoPrimeiroPrato()
     {
-        PratoModel prato = new ("Bolo de Chocolate");
-        ValidarPratoHelper validarPratoHelper = new ();
-        string input = "s";
-        StringReader respostaUsuario = new (input);
+        PratoModel pratoInicial = new()
+        {
+            ListaDePratos = new()
+            {
+                new PratoModel { Prato = "Lasanha" },
+                new PratoModel { Prato = "Macarrão" },
+                new PratoModel { Prato = "Bolo de chocolate" }
+            }
+        };
 
-        Console.SetIn(respostaUsuario);
+        Console.SetIn(new StringReader("s"));
 
-        bool acertou = false;
-        bool continuaProcura = true;
-        validarPratoHelper.ValidarPrato(prato, ref acertou, ref continuaProcura);
+        PratoModel resultado = ValidarPratoHelper.ValidarPrato(pratoInicial);
 
-        ClassicAssert.IsTrue(acertou);
-        ClassicAssert.IsFalse(continuaProcura);
+        ClassicAssert.AreEqual("Lasanha", resultado.Prato);
+
+        ClassicAssert.AreNotEqual("Macarrão", resultado.Prato);
+        ClassicAssert.AreNotEqual("Bolo de chocolate", resultado.Prato);
+    }
+
+    [Test]
+    public void ValidarPrato_DeveRetornarPratoCorreto_QuandoUsuarioRespondeSimNoSegundoPrato()
+    {
+        PratoModel pratoInicial = new()
+        {
+            ListaDePratos = new()
+            {
+                new PratoModel { Prato = "Lasanha" },
+                new PratoModel { Prato = "Macarrão" },
+                new PratoModel { Prato = "Bolo de chocolate" }
+            }
+        };
+
+        string respostaPratoUm = "n";
+        string respostaPratoDois = "s";
+        Console.SetIn(new StringReader($"{respostaPratoUm}\n{respostaPratoDois}\n"));
+
+        PratoModel resultado = ValidarPratoHelper.ValidarPrato(pratoInicial);
+
+        ClassicAssert.AreEqual("Macarrão", resultado.Prato);
+
+        ClassicAssert.AreNotEqual("Lasanha", resultado.Prato);
+        ClassicAssert.AreNotEqual("Bolo de chocolate", resultado.Prato);
+    }
+
+    [Test]
+    public void ValidarPrato_DeveRetornarListaVazia_QuandoOJogoNaoAcertaOPrato()
+    {
+        PratoModel pratoInicial = new ()
+        {
+            ListaDePratos = new ()
+            {
+                new PratoModel { Prato = "Lasanha" },
+                new PratoModel { Prato = "Macarrão" },
+                new PratoModel { Prato = "Bolo de chocolate" }
+            }
+        };
+
+        Console.SetIn(new StringReader($"n\n n\n n\n"));
+
+        PratoModel resultado = ValidarPratoHelper.ValidarPrato(pratoInicial);
+
+        ClassicAssert.IsEmpty(resultado.ListaDePratos);
+        ClassicAssert.AreEqual("", resultado.Prato);
+
+        ClassicAssert.AreNotEqual("Lasanha", resultado.Prato);
+        ClassicAssert.AreNotEqual("Macarrão", resultado.Prato);
+        ClassicAssert.AreNotEqual("Bolo de chocolate", resultado.Prato);
     }
 
     [Test]
     public void InserirPratoHelper_InserirNovoPratoSemDescicao_PratoInseridoComSucesso()
     {
-        PratoModel prato = new ("Massa");
+        PratoModel prato = new("Massa");
         string input = "Macarrão";
-        StringReader nomePratoNovo = new (input);
+        StringReader nomePratoNovo = new(input);
         Console.SetIn(nomePratoNovo);
 
         InserirPratoHelper.InserirNovoPrato(prato);
@@ -35,7 +90,6 @@ public class JogoGourmetTests
         ClassicAssert.AreEqual(1, prato.ListaDePratos.Count);
         ClassicAssert.AreEqual(0, prato.ListaDePratos[0].ListaDePratos.Count);
         ClassicAssert.AreEqual("Macarrão", prato.ListaDePratos[0].Prato);
-
     }
 
     [Test]
@@ -55,10 +109,10 @@ public class JogoGourmetTests
     [Test]
     public void InserirPratoHelper_InserirPratoQueJaExiste_SeOPratoExistirNaoDeveSerInseridoNovamente()
     {
-        PratoModel prato = new ("Massa");
-        prato.ListaDePratos.Add(new ("Macarrão"));
+        PratoModel prato = new("Massa");
+        prato.ListaDePratos.Add(new("Macarrão"));
         string input = "Macarrão";
-        StringReader nomePratoNovo = new (input);
+        StringReader nomePratoNovo = new(input);
         Console.SetIn(nomePratoNovo);
 
         InserirPratoHelper.InserirNovoPrato(prato);
