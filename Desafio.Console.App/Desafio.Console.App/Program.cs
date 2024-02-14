@@ -9,63 +9,60 @@ List<PratoModel> prato = new List<PratoModel>
             new PratoModel("Bolo de chocolate")
         };
 
-PratoModel pratoInicial = new("", prato);
+PratoModel primeiroPrato = new("", prato);
 
-IPratoFavorito pratoQueGosta = new ValidarPratoHelper();
+bool continuarJogo = true;
+bool pararLoop = false;
 
-var sair = "n";
-do
+while (continuarJogo)
 {
+    PratoModel pratoInicial = primeiroPrato;
+
     Console.WriteLine("\nPense em um prato que gosta, digite 's' para 'sim' e 'n' para 'não'");
-
-    var acertou = false;
-    bool continuaProcura = true;
-
-    var indice = pratoInicial.ListaDePratos.Count;
-
-    while (indice > 0)
+    while (!pararLoop)
     {
-        indice--;
-        pratoInicial.ListaDePratos[indice].BuscarPrato(pratoQueGosta, ref acertou, ref continuaProcura);
+        PratoModel pratoValidadoPeloUsuario = ValidarPratoHelper.ValidarPrato(pratoInicial);
 
-        if (acertou || !continuaProcura)
-        {
-            break;
-        }
+        pararLoop = string.IsNullOrEmpty(pratoValidadoPeloUsuario.Prato) && pratoValidadoPeloUsuario.ListaDePratosEhVazia;
 
-        if (indice == 0)
+        if (pararLoop)
         {
             InserirPratoHelper.InserirNovoPrato(pratoInicial);
         }
+        else
+        {
+            if (pratoValidadoPeloUsuario.ListaDePratosEhVazia)
+            {
+                Console.WriteLine($"Acertei de novo! O prato que você pensou é {pratoValidadoPeloUsuario.Prato}");
+                pararLoop = true;
+            }
+            else
+            {
+                pratoInicial = pratoValidadoPeloUsuario;
+            }
+        }
     }
 
-    if (acertou)
-    {
-        Console.WriteLine("Acertei de novo! \n");
-    }
+    Console.WriteLine("Deseja sair? Responda sim ou não");
+    string respostaUsuario = Console.ReadLine().ToLower();
 
-    Console.WriteLine("Deseja sair? Se sim digite 'sim' \n");
-    sair = Console.ReadLine().ToLower();
+    continuarJogo = respostaUsuario != "sim";
+    pararLoop = false;
     Console.Clear();
-} while (sair != "sim");
-
-
-
-public interface IPratoFavorito
-{
-    void ValidarPrato(PratoModel prato, ref bool acertou, ref bool continuaProcura);
 }
 
-public interface IComidaFavorita
-{
-    void BuscarPrato(IPratoFavorito pratoFavorito, ref bool acertou, ref bool continuaProcura);
-}
 
-public class PratoModel : IComidaFavorita
+
+public class PratoModel
 {
-    public string Prato { get; set; }
+    public string Prato { get; set; } = "";
 
     public List<PratoModel> ListaDePratos { get; set; } = [];
+
+    public bool ListaDePratosEhVazia => ListaDePratos.Count == 0;
+
+    public PratoModel()
+    { }
 
     public PratoModel(string prato)
     {
@@ -77,51 +74,27 @@ public class PratoModel : IComidaFavorita
         Prato = prato;
         ListaDePratos = listaDePratos;
     }
-
-    public void BuscarPrato(IPratoFavorito pratoFavorito, ref bool acertou, ref bool continuaProcura)
-    {
-        pratoFavorito.ValidarPrato(this, ref acertou, ref continuaProcura);
-    }
 }
 
 
-public class ValidarPratoHelper : IPratoFavorito
+public class ValidarPratoHelper
 {
-    public void ValidarPrato(PratoModel prato, ref bool acertou, ref bool continuaProcura)
+    public static PratoModel ValidarPrato(PratoModel pratoInicial)
     {
-        acertou = false;
+        PratoModel listaVazia = new();
 
-        Console.WriteLine($"O prato que você pensou é {prato.Prato} ?");
-
-        string? respostaUsuario = Console.ReadLine().ToLower();
-
-        if (respostaUsuario == "s")
+        foreach (PratoModel prato in pratoInicial.ListaDePratos)
         {
-            acertou = true;
-            continuaProcura = false;
-            var indice = prato.ListaDePratos.Count;
+            Console.WriteLine($"O prato que você pensou é {prato.Prato} ?");
+            string? respostaUsuario = Console.ReadLine().ToLower();
 
-            IPratoFavorito pratoQueGosta = new ValidarPratoHelper();
-            while (indice > 0)
+            if (respostaUsuario == "s")
             {
-                indice--;
-                prato.ListaDePratos[indice].BuscarPrato(pratoQueGosta, ref acertou, ref continuaProcura);
-
-                if (acertou)
-                {
-                    break;
-                }
-
-                if (indice == 0)
-                {
-                    InserirPratoHelper.InserirNovoPrato(prato);
-                }
+                return prato;
             }
         }
-        else
-        {
-            return;
-        }
+
+        return listaVazia;
     }
 }
 
@@ -152,7 +125,7 @@ Caso não queira dar uma característica deixe em branco.");
 
     private static bool ValidaPratoNovo(PratoModel prato, string nomePratoNovo, string? caracteristicaPratoNovo)
     {
-        return prato.ListaDePratos.Any(p => p.Prato.Equals(nomePratoNovo, StringComparison.CurrentCultureIgnoreCase) 
+        return prato.ListaDePratos.Any(p => p.Prato.Equals(nomePratoNovo, StringComparison.CurrentCultureIgnoreCase)
                                          || p.Prato.Equals(caracteristicaPratoNovo, StringComparison.CurrentCultureIgnoreCase));
     }
 }
